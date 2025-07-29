@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+google-generativeai
+faiss-cpu
+pymupdf
+transformers
+requests
+numpy 
+python-dotenv
+python-multipart
