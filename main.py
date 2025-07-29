@@ -23,10 +23,10 @@ def clean_answer(text):
     return text.strip()
 
 class QueryRequest(BaseModel):
-    document_url: str
+    documents: str
     questions: List[str]
 
-@app.post("/api/v1/hackrx/run")
+@app.post("api/v1/hackrx/run")
 async def run_query(request: Request, body: QueryRequest):
     print("Received request")
     auth = request.headers.get("authorization")
@@ -35,7 +35,7 @@ async def run_query(request: Request, body: QueryRequest):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing authorization token.")
 
     print("Parsing PDF")
-    chunks, chunk_metadata = parse_pdf_from_url(body.document_url)
+    chunks, chunk_metadata = parse_pdf_from_url(body.documents)
     print(f"Parsed PDF into {len(chunks)} chunks")
 
     print("Embedding chunks")
