@@ -26,7 +26,7 @@ class QueryRequest(BaseModel):
     documents: str
     questions: List[str]
 
-@app.post("api/v1/hackrx/run")
+@app.post("/api/v1/hackrx/run")
 async def run_query(request: Request, body: QueryRequest):
     print("Received request")
     auth = request.headers.get("authorization")
