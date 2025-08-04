@@ -1,12 +1,11 @@
-import os
-from typing import List
+# resolver.py
 import google.generativeai as genai
+from typing import List
 from embedder import embed_chunks
 from retriever import retrieve_top_k
+import os
 
-# Configure Gemini API
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
 LLM_MODEL = "models/gemini-1.5-flash-latest"
 model = genai.GenerativeModel(model_name=LLM_MODEL)
 
@@ -18,36 +17,29 @@ def answer_questions_with_gemini(
     index
 ) -> List[str]:
     answers = []
-    for q in questions:
+    for question in questions:
         try:
-            # Embed question
-            q_emb = embed_chunks([q])[0]
-
-            # Retrieve top-k relevant chunks
-            top_k_idx = retrieve_top_k(q_emb, index, k=3)
+            q_emb = embed_chunks([question])[0]
+            top_k_idx = retrieve_top_k(q_emb, index, k=5)
             context = "\n\n".join([chunks[i] for i in top_k_idx])
 
-            # Create prompt
             prompt = f"""
-You are an expert legal/compliance assistant. Based on the following document context, answer the question clearly and accurately.
+You are a helpful assistant. Based on the document context, answer the question briefly and accurately.
 
-Document Context:
+Context:
 {context}
 
-Question: {q}
-"""
+Question: {question}
+Answer:"""
 
-            # Generate answer
             response = model.generate_content(prompt)
-            text = response.text.strip()
-
-            # Clean answer prefix
-            for prefix in ["**Answer:**", "Answer:", "**Answer**:", "**Answer**", "answer:", "answer"]:
-                if text.lower().startswith(prefix.lower()):
-                    text = text[len(prefix):].strip(" :.-")
-            answers.append(text)
+            answer = response.text.strip()
+            for prefix in ["**Answer:**", "Answer:", "**Answer**", "answer:"]:
+                if answer.lower().startswith(prefix.lower()):
+                    answer = answer[len(prefix):].strip(" :.-")
+            answers.append(answer)
 
         except Exception as e:
-            answers.append(f"Could not process question '{q}': {str(e)}")
+            answers.append(f"Error answering: {question} — {str(e)}")
 
     return answers
